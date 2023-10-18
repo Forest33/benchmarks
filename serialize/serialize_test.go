@@ -1,6 +1,8 @@
 package serialize
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -22,6 +24,7 @@ var (
 	jsonUsers    []byte
 	msgpackUsers []byte
 	pbUsers      []byte
+	gobUsers     bytes.Buffer
 )
 
 func init() {
@@ -54,9 +57,14 @@ func init() {
 	msgpackUsers, _ = msgpack.Marshal(&users)
 	pbUsers, _ = proto.Marshal(protoUsers)
 
+	gob.Register([]*entity.User{})
+	enc := gob.NewEncoder(&gobUsers)
+	_ = enc.Encode(users)
+
 	fmt.Printf("JSON:\t\t%d bytes\n", len(jsonUsers))
 	fmt.Printf("Msgpack:\t%d bytes\n", len(msgpackUsers))
 	fmt.Printf("Protobuf:\t%d bytes\n", len(pbUsers))
+	fmt.Printf("Gob:\t\t%d bytes\n", gobUsers.Len())
 }
 
 func BenchmarkMarshalJson(b *testing.B) {
@@ -104,6 +112,25 @@ func BenchmarkUnmarshalMsgpack(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		out := make([]*entity.User, 0, usersCount)
 		_ = msgpack.Unmarshal(msgpackUsers, &out)
+	}
+}
+
+func BenchmarkMarshalGob(b *testing.B) {
+	var out bytes.Buffer
+	enc := gob.NewEncoder(&out)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		_ = enc.Encode(users)
+		out.Reset()
+	}
+}
+
+func BenchmarkUnmarshalGob(b *testing.B) {
+	dec := gob.NewDecoder(&gobUsers)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		out := make([]*entity.User, 0, usersCount)
+		_ = dec.Decode(&out)
 	}
 }
 
