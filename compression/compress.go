@@ -2,7 +2,10 @@ package compression
 
 import (
 	"bytes"
+	"io"
 
+	"github.com/klauspost/compress/gzip"
+	"github.com/klauspost/compress/snappy"
 	"github.com/klauspost/compress/zstd"
 	"github.com/pierrec/lz4/v4"
 	"github.com/rasky/go-lzo"
@@ -89,4 +92,39 @@ func (c *Compressor) DecompressZSTD(in []byte) ([]byte, error) {
 		return in, err
 	}
 	return out, nil
+}
+
+func (c *Compressor) CompressGzip(in []byte) ([]byte, bool) {
+	out := &bytes.Buffer{}
+	w := gzip.NewWriter(out)
+	_, _ = w.Write(in)
+	_ = w.Close()
+	if out.Len() >= len(in) {
+		return in, false
+	}
+	return out.Bytes(), true
+}
+
+func (c *Compressor) DecompressGzip(in []byte) ([]byte, error) {
+	r, err := gzip.NewReader(bytes.NewBuffer(in))
+	if err != nil {
+		return nil, err
+	}
+	return io.ReadAll(r)
+}
+
+func (c *Compressor) CompressSnappy(in []byte) ([]byte, bool) {
+	out := &bytes.Buffer{}
+	w := snappy.NewBufferedWriter(out)
+	_, _ = w.Write(in)
+	_ = w.Close()
+	if out.Len() >= len(in) {
+		return in, false
+	}
+	return out.Bytes(), true
+}
+
+func (c *Compressor) DecompressSnappy(in []byte) ([]byte, error) {
+	r := snappy.NewReader(bytes.NewBuffer(in))
+	return io.ReadAll(r)
 }

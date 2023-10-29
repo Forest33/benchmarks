@@ -1,6 +1,7 @@
 package compression
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/forest33/benchmarks/entity"
@@ -9,6 +10,21 @@ import (
 const (
 	zstdCompressionLevel = 2
 )
+
+func init() {
+	cmp := New(&Config{PayloadSize: len(entity.TextData)})
+	lz4, _ := cmp.CompressLZ4(entity.TextData)
+	lzo, _ := cmp.CompressLZO(entity.TextData)
+	zstd, _ := cmp.CompressZSTD(entity.TextData, zstdCompressionLevel)
+	gzip, _ := cmp.CompressGzip(entity.TextData)
+	snappy, _ := cmp.CompressSnappy(entity.TextData)
+
+	fmt.Printf("LZ4:\t\t%d bytes\n", len(lz4))
+	fmt.Printf("LZO:\t\t%d bytes\n", len(lzo))
+	fmt.Printf("ZSTD:\t\t%d bytes\n", len(zstd))
+	fmt.Printf("Gzip:\t\t%d bytes\n", len(gzip))
+	fmt.Printf("Snappy:\t\t%d bytes\n", len(snappy))
+}
 
 func BenchmarkCompressLZ4(b *testing.B) {
 	cmp := New(&Config{PayloadSize: len(entity.TextData)})
@@ -63,6 +79,44 @@ func BenchmarkDecompressZSTD(b *testing.B) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		out, _ := cmp.DecompressZSTD(data)
+		_ = out
+	}
+}
+
+func BenchmarkCompressGzip(b *testing.B) {
+	cmp := New(&Config{PayloadSize: len(entity.TextData)})
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		out, _ := cmp.CompressGzip(entity.TextData)
+		_ = out
+	}
+}
+
+func BenchmarkDecompressGzip(b *testing.B) {
+	cmp := New(&Config{PayloadSize: len(entity.TextData)})
+	data, _ := cmp.CompressGzip(entity.TextData)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		out, _ := cmp.DecompressGzip(data)
+		_ = out
+	}
+}
+
+func BenchmarkCompressSnappy(b *testing.B) {
+	cmp := New(&Config{PayloadSize: len(entity.TextData)})
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		out, _ := cmp.CompressSnappy(entity.TextData)
+		_ = out
+	}
+}
+
+func BenchmarkDecompressSnappy(b *testing.B) {
+	cmp := New(&Config{PayloadSize: len(entity.TextData)})
+	data, _ := cmp.CompressSnappy(entity.TextData)
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		out, _ := cmp.DecompressSnappy(data)
 		_ = out
 	}
 }
