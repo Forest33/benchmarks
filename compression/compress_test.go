@@ -19,11 +19,12 @@ func init() {
 	gzip, _ := cmp.CompressGzip(entity.TextData)
 	snappy, _ := cmp.CompressSnappy(entity.TextData)
 
-	fmt.Printf("LZ4:\t\t%d bytes\n", len(lz4))
-	fmt.Printf("LZO:\t\t%d bytes\n", len(lzo))
-	fmt.Printf("ZSTD:\t\t%d bytes\n", len(zstd))
-	fmt.Printf("Gzip:\t\t%d bytes\n", len(gzip))
-	fmt.Printf("Snappy:\t\t%d bytes\n", len(snappy))
+	fmt.Printf("Without compression:\t%d bytes\n", len(entity.TextData))
+	fmt.Printf("LZ4:\t\t\t\t\t%d bytes\n", len(lz4))
+	fmt.Printf("LZO:\t\t\t\t\t%d bytes\n", len(lzo))
+	fmt.Printf("ZSTD:\t\t\t\t\t%d bytes\n", len(zstd))
+	fmt.Printf("Gzip:\t\t\t\t\t%d bytes\n", len(gzip))
+	fmt.Printf("Snappy:\t\t\t\t\t%d bytes\n", len(snappy))
 }
 
 func BenchmarkCompressLZ4(b *testing.B) {

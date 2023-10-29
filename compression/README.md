@@ -1,11 +1,12 @@
 # Compression
 
 ```
-LZ4:		2165 bytes
-LZO:		1926 bytes
-ZSTD:		1389 bytes
-Gzip:		1360 bytes
-Snappy:		1950 bytes
+Without compression:    2606 bytes
+LZ4                     2165 bytes
+LZO:                    1926 bytes
+ZSTD:                   1389 bytes
+Gzip:                   1360 bytes
+Snappy:                 1950 bytes
 
 goos: linux
 goarch: amd64
